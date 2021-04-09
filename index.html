@@ -1,0 +1,225 @@
+<!DOCTYPE html>
+<html lang="it">
+
+<head>
+    <title>Range slider affordability</title>
+    <link rel="stylesheet" href="style.css">
+</head>
+
+<body>
+    <p><strong>Purchase price</strong></p>
+    <div class="row">
+        <div class="column">
+            <input type="range" min="0" max="5000000" value="0" name="ans" step="10000"
+                oninput="setPurchasePriceSliderText(this)" class="slider" id="purchasePrice" />
+        </div>
+        <div class="column">
+            <input type="text" id="purchasePriceText" value="" onchange="setPurchasePriceSlider(this)" /> CHF
+        </div>
+    </div>
+
+    <p><strong>Annual gross income</strong></p>
+    <div class="row">
+        <div class="column">
+            <input type="range" min="0" max="400000" value="0" name="ans" step="1000"
+                oninput="setAnnualGrossIncomeSliderText(this)" class="slider" id="annualGrossIncome" />
+        </div>
+        <div class="column">
+            <input type="text" id="annualGrossIncomeText" value="" onchange="setAnnualGrossIncomeSlider(this)" /> CHF
+        </div>
+    </div>
+
+    <p><strong>Own funds</strong></p>
+    <div class="row">
+        <div class="column">
+            <input type="range" min="0" max="3000000" value="0" name="ans" step="10000"
+                oninput="setOwnFundsSliderText(this)" class="slider" id="ownFunds" />
+        </div>
+        <div class="column">
+            <input type="text" id="ownFundsText" value="" onchange="setOwnFundsSlider(this)" /> CHF
+        </div>
+    </div>
+
+    <div class="row">
+        <div class="column">
+            <p>
+                <strong>Technical tax (%): </strong>
+            </p>
+        </div>
+        <div class="column">
+            <p>
+                <input type="text" id="technicalTax" value="" onchange="calculateAffordabilityFromHtml()" />
+            </p>
+        </div>
+    </div>
+
+    <div class="row">
+        <div class="column">
+            <p>
+                <strong>Maintenance costs (%): </strong>
+            </p>
+        </div>
+        <div class="column">
+            <p>
+                <input type="text" id="maintenanceCosts" value="" onchange="calculateAffordabilityFromHtml()" />
+            </p>
+        </div>
+    </div>
+
+    <div class="row">
+        <div class="column">
+            <p>
+                <strong>Affordability: </strong>
+            </p>
+        </div>
+        <div class="column">
+            <p>
+                <input type="" style="font-size: 25px; width: 100px" value="" id="affordability" /> %
+            </p>
+        </div>
+    </div>
+
+    <script>
+        var purchasePriceSlider = document.getElementById("purchasePrice");
+        var annualGrossIncomeSlider = document.getElementById("annualGrossIncome");
+        var ownFundsSlider = document.getElementById("ownFunds");
+        var purchasePriceText = document.getElementById("purchasePriceText");
+        var annualGrossIncomeText = document.getElementById("annualGrossIncomeText");
+        var ownFundsText = document.getElementById("ownFundsText");
+        var affordability = document.getElementById("affordability");
+        var technicalTax = document.getElementById("technicalTax");
+        var maintenanceCosts = document.getElementById("maintenanceCosts");
+
+        purchasePriceText.innerHTML = purchasePriceSlider.value;
+        annualGrossIncomeText.innerHTML = annualGrossIncomeSlider.value;
+        ownFundsText.innerHTML = ownFundsSlider.value;
+
+        purchasePriceSlider.oninput = function () {
+            purchasePriceText.value = this.value
+                .toString()
+                .replace(/(\d)(?=(\d{3})+(?!\d))/g, "$1,");
+            calculateAffordability(
+                purchasePriceSlider.value,
+                ownFundsSlider.value,
+                annualGrossIncomeSlider.value,
+                technicalTax.value,
+                maintenanceCosts.value
+            );
+        };
+
+        annualGrossIncomeSlider.oninput = function () {
+            annualGrossIncomeText.value = this.value
+                .toString()
+                .replace(/(\d)(?=(\d{3})+(?!\d))/g, "$1,");
+            calculateAffordability(
+                purchasePriceSlider.value,
+                ownFundsSlider.value,
+                annualGrossIncomeSlider.value,
+                technicalTax.value,
+                maintenanceCosts.value
+            );
+        };
+
+        ownFundsSlider.oninput = function () {
+            ownFundsText.value = this.value
+                .toString()
+                .replace(/(\d)(?=(\d{3})+(?!\d))/g, "$1,");
+            calculateAffordability(
+                purchasePriceSlider.value,
+                ownFundsSlider.value,
+                annualGrossIncomeSlider.value,
+                technicalTax.value,
+                maintenanceCosts.value
+            );
+        };
+
+        function calculateAffordability(
+            purchasePrice,
+            ownFunds,
+            annualGrossIncome,
+            technicalTax,
+            maintenanceCosts
+        ) {
+            if (purchasePrice > 0 && ownFunds > 0 && annualGrossIncome > 0 && technicalTax > 0 && maintenanceCosts > 0) {
+                var financiablePerc = ((purchasePrice - ownFunds) * technicalTax) / 100;
+                var totalPerc = (purchasePrice * maintenanceCosts) / 100;
+                var totalValue = financiablePerc + totalPerc;
+                affordability.value = (
+                    (totalValue / annualGrossIncome) *
+                    100
+                ).toFixed(1);
+                if (affordability.value <= 34) {
+                    affordability.style.color = "green";
+                } else {
+                    affordability.style.color = "red";
+                }
+            }
+        }
+
+        function calculateAffordabilityFromHtml() {
+            return calculateAffordability(
+                purchasePriceSlider.value,
+                ownFundsSlider.value,
+                annualGrossIncomeSlider.value,
+                technicalTax.value,
+                maintenanceCosts.value
+            )
+        }
+
+        function setPurchasePriceSliderText(x) {
+            purchasePriceText.value = x.value;
+        }
+
+        function setAnnualGrossIncomeSliderText(x) {
+            annualGrossIncomeText.value = x.value;
+        }
+
+        function setOwnFundsSliderText(x) {
+            ownFundsText.value = x.value;
+        }
+
+        function setPurchasePriceSlider(x) {
+            purchasePriceSlider.value = x.value;
+            purchasePriceText.value = x.value
+                .toString()
+                .replace(/(\d)(?=(\d{3})+(?!\d))/g, "$1,");
+            calculateAffordability(
+                purchasePriceSlider.value,
+                ownFundsSlider.value,
+                annualGrossIncomeSlider.value,
+                technicalTax.value,
+                maintenanceCosts.value
+            );
+        }
+
+        function setAnnualGrossIncomeSlider(x) {
+            annualGrossIncomeSlider.value = x.value;
+            annualGrossIncomeText.value = x.value
+                .toString()
+                .replace(/(\d)(?=(\d{3})+(?!\d))/g, "$1,");
+            calculateAffordability(
+                purchasePriceSlider.value,
+                ownFundsSlider.value,
+                annualGrossIncomeSlider.value,
+                technicalTax.value,
+                maintenanceCosts.value
+            );
+        }
+
+        function setOwnFundsSlider(x) {
+            ownFundsSlider.value = x.value;
+            ownFundsText.value = x.value
+                .toString()
+                .replace(/(\d)(?=(\d{3})+(?!\d))/g, "$1,");
+            calculateAffordability(
+                purchasePriceSlider.value,
+                ownFundsSlider.value,
+                annualGrossIncomeSlider.value,
+                technicalTax.value,
+                maintenanceCosts.value
+            );
+        }
+    </script>
+</body>
+
+</html>
